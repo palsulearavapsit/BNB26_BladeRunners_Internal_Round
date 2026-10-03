@@ -51,12 +51,26 @@ def python_executable() -> str:
     return sys.executable
 
 
+def command_succeeds(command: list[str], cwd: Path) -> bool:
+    return subprocess.run(command, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+
+
 def install_dependencies() -> None:
     backend_python = python_executable()
-    run_checked([backend_python, "-m", "pip", "install", "-r", "requirements.txt"], BACKEND)
+    backend_ready = command_succeeds(
+        [backend_python, "-c", "import fastapi, httpx, pydantic_settings, supabase"],
+        BACKEND,
+    )
+    if not backend_ready:
+        run_checked([backend_python, "-m", "pip", "install", "-r", "requirements.txt"], BACKEND)
+    else:
+        print("Backend dependencies are already installed; skipping pip install.")
+
     if not (FRONTEND / "node_modules").exists():
         npm = "npm.cmd" if os.name == "nt" else "npm"
         run_checked([npm, "install"], FRONTEND)
+    else:
+        print("Frontend dependencies are already installed; skipping npm install.")
 
 
 def check_tools() -> None:
