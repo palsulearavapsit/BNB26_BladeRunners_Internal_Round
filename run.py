@@ -17,6 +17,8 @@ import signal
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 
@@ -55,6 +57,44 @@ def install_dependencies() -> None:
     if not (FRONTEND / "node_modules").exists():
         npm = "npm.cmd" if os.name == "nt" else "npm"
         run_checked([npm, "install"], FRONTEND)
+
+
+def check_tools() -> None:
+    if not shutil.which("node"):
+        raise RuntimeError("Node.js is required to start the frontend. Install Node.js and run python run.py again.")
+    if not shutil.which("npm") and not shutil.which("npm.cmd"):
+        raise RuntimeError("npm is required to start the frontend. Install Node.js and run python run.py again.")
+
+
+def report_configuration() -> None:
+    frontend_env = FRONTEND / ".env"
+    if not frontend_env.exists():
+        return
+    values = {}
+    for line in frontend_env.read_text(encoding="utf-8").splitlines():
+        if "=" in line and not line.lstrip().startswith("#"):
+            key, value = line.split("=", 1)
+            values[key.strip()] = value.strip()
+    if values.get("VITE_SUPABASE_URL") in {"", "https://your-project.supabase.co"} or values.get("VITE_SUPABASE_ANON_KEY") in {"", "your-anon-key"}:
+        print(
+            "Warning: frontend/.env still has placeholder Supabase values. "
+            "The app will start, but sign-up/sign-in will not work until you replace them."
+        )
+
+
+def wait_for_backend(process: subprocess.Popen[str]) -> None:
+    deadline = time.time() + 15
+    url = "http://127.0.0.1:8000/api/health"
+    while time.time() < deadline:
+        if process.poll() is not None:
+            raise RuntimeError("The backend stopped during startup.")
+        try:
+            with urllib.request.urlopen(url, timeout=1) as response:
+                if response.status == 200:
+                    return
+        except (OSError, urllib.error.URLError):
+            time.sleep(0.25)
+    raise RuntimeError("The backend did not become ready at http://127.0.0.1:8000.")
 
 
 def start_processes() -> list[subprocess.Popen[str]]:
@@ -102,11 +142,19 @@ def main() -> int:
 
     copy_env_if_missing(BACKEND)
     copy_env_if_missing(FRONTEND)
+    check_tools()
+    report_configuration()
 
     if not args.skip_install:
         install_dependencies()
 
     processes = start_processes()
+    try:
+        wait_for_backend(processes[0])
+    except RuntimeError as error:
+        stop_processes(processes)
+        print(str(error), file=sys.stderr)
+        return 1
     print("\nSATYA is running:")
     print("  Frontend: http://localhost:5173")
     print("  Backend:  http://localhost:8000")
