@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_prefix: str = "/api"
     max_upload_bytes: int = 25 * 1024 * 1024
+    max_text_characters: int = 100_000
     supabase_url: str | None = None
     supabase_key: str | None = None
     persistence_mode: str = "supabase"

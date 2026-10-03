@@ -7,3 +7,4 @@ class NormalizedPrediction(BaseModel):
     signals: list[str] = Field(default_factory=list)
     model_name: str
     is_development_inference: bool = True
+    metadata: dict[str, object] = Field(default_factory=dict)

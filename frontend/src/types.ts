@@ -14,4 +14,6 @@ export interface Analysis {
   evidence: Evidence[]
   durationMs?: number
   isDemo?: boolean
+  score?: number
+  metadata?: Record<string, unknown>
 }

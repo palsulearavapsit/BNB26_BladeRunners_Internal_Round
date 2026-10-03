@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from fastapi import HTTPException
 from uuid import UUID
 
 from app.models import AnalysisResult
@@ -16,6 +17,10 @@ def analyze_file(analysis_id: UUID, filename: str, modality: str, payload: bytes
         output = audio.analyze(payload, metadata)
     elif modality == "text":
         extracted, notes = extract_text(filename, payload)
+        if not extracted or not extracted.strip():
+            raise ValueError("Text input is empty")
+        if len(extracted) > 100_000:
+            raise HTTPException(status_code=413, detail="Text input exceeds 100000 characters")
         metadata["extracted_characters"] = len(extracted or "")
         output = text.analyze(payload, metadata, notes)
     else:

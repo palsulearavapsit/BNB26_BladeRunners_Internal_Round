@@ -1,0 +1,18 @@
+{
+  "status": "incomplete",
+  "dataset_root": "image",
+  "manifest": "metadata.csv",
+  "total_manifest_rows": 0,
+  "valid_files": 0,
+  "invalid_files": 0,
+  "duplicate_hash_groups": 0,
+  "missing_provenance_rows": 0,
+  "missing_license_rows": 0,
+  "counts_by_category": {},
+  "counts_by_source": {},
+  "issues": [],
+  "limitations": [
+    "No near-duplicate detector is run; perceptual-hash review remains required.",
+    "A ready status only validates local manifest/file integrity, not dataset license validity."
+  ]
+}

@@ -2,3 +2,15 @@
 .venv/
 __pycache__/
 .pytest_cache/
+
+# Locally acquired image datasets; keep manifests and reports tracked.
+data/image/raw/*
+data/image/authentic/*
+data/image/manipulated/*
+data/image/synthetic/*
+data/image/processed/*
+!data/image/raw/.gitkeep
+!data/image/authentic/.gitkeep
+!data/image/manipulated/.gitkeep
+!data/image/synthetic/.gitkeep
+!data/image/processed/.gitkeep
