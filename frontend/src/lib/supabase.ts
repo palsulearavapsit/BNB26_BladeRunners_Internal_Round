@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
-import { config } from './config'
+import { config, hasSupabaseConfig } from './config'
 
-export const supabase = config.supabaseUrl && config.supabaseAnonKey
+export const supabase = hasSupabaseConfig
   ? createClient(config.supabaseUrl, config.supabaseAnonKey, {
       auth: { persistSession: false, autoRefreshToken: true, detectSessionInUrl: true },
     })

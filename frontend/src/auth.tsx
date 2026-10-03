@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
+import { hasSupabaseConfig } from './lib/config'
 
 interface AuthValue {
   session: Session | null
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthValue>(() => ({
     session,
     loading,
-    configured: Boolean(supabase),
+    configured: hasSupabaseConfig,
     signIn: async (email, password) => {
       const { error } = await requireClient().auth.signInWithPassword({ email, password })
       if (error) throw error
