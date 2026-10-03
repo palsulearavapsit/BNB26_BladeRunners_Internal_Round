@@ -2,23 +2,33 @@ from pathlib import Path
 
 from fastapi import HTTPException, UploadFile
 
-ALLOWED_EXTENSIONS = {
+EXTENSION_MODALITIES = {
     "image": {".jpg", ".jpeg", ".png", ".webp", ".gif"},
     "video": {".mp4", ".mov", ".avi", ".mkv", ".webm"},
     "audio": {".mp3", ".wav", ".m4a", ".ogg", ".flac"},
-    "text": {".txt", ".md", ".csv", ".json"},
-    "document": {".pdf", ".docx", ".xlsx", ".pptx"},
+    "voice": {".amr", ".3gp", ".3gpp"},
+    "text": {".txt", ".md", ".csv", ".json", ".log", ".xml", ".html"},
+    "document": {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"},
 }
 
 
 def infer_modality(filename: str, content_type: str | None) -> str:
     suffix = Path(filename).suffix.lower()
-    for modality, extensions in ALLOWED_EXTENSIONS.items():
+    normalized_type = (content_type or "").split(";", 1)[0].lower()
+    if normalized_type.startswith("image/"):
+        return "image"
+    if normalized_type.startswith("video/"):
+        return "video"
+    if normalized_type.startswith("audio/"):
+        if "voice" in Path(filename).stem.lower() or "recording" in Path(filename).stem.lower():
+            return "voice"
+        return "audio"
+    if normalized_type.startswith("text/"):
+        return "text"
+    for modality, extensions in EXTENSION_MODALITIES.items():
         if suffix in extensions:
             return modality
-    if content_type and content_type.startswith("text/"):
-        return "text"
-    raise HTTPException(status_code=415, detail="Unsupported file type")
+    return "unknown"
 
 
 async def read_upload(upload: UploadFile, max_bytes: int) -> bytes:

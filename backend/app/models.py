@@ -5,7 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
-Modality = Literal["image", "video", "audio", "text", "document"]
+Modality = Literal["image", "video", "audio", "voice", "text", "document", "unknown"]
 
 
 class UploadResponse(BaseModel):

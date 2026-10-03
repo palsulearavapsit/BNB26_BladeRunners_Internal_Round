@@ -12,7 +12,7 @@ def analyze_file(analysis_id: UUID, filename: str, modality: str, payload: bytes
         output = image.analyze(payload, metadata)
     elif modality == "video":
         output = video.analyze(payload, metadata)
-    elif modality == "audio":
+    elif modality in {"audio", "voice"}:
         output = audio.analyze(payload, metadata)
     elif modality == "text":
         extracted, notes = extract_text(filename, payload)

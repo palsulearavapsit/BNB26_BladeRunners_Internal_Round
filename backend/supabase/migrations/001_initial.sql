@@ -2,12 +2,15 @@ create table if not exists public.analyses (
   id uuid primary key,
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   filename text not null,
-  modality text not null check (modality in ('image','video','audio','text','document')),
+  modality text not null check (modality in ('image','video','audio','voice','text','document','unknown')),
   label text not null,
   confidence numeric not null check (confidence >= 0 and confidence <= 1),
   result jsonb not null,
   created_at timestamptz not null default now()
 );
+alter table public.analyses drop constraint if exists analyses_modality_check;
+alter table public.analyses add constraint analyses_modality_check
+  check (modality in ('image','video','audio','voice','text','document','unknown'));
 alter table public.analyses enable row level security;
 do $$ begin
   create policy "Users can read their analyses" on public.analyses

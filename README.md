@@ -11,6 +11,11 @@ deterministic, explainable placeholder scores and mark the response as demo
 inference; no placeholder output is presented as a genuine forensic detection.
 The adapter boundary is ready for local models or external inference endpoints.
 
+Uploads accept any file extension. SATYA detects `image`, `video`, `audio`,
+`voice`, `text`, `document`, or `unknown` using the MIME type first and the
+filename extension as a fallback. Unknown files are retained and analyzed by
+the generic document pipeline instead of being rejected.
+
 ## Repository layout
 
 - [`backend/`](./backend) — FastAPI API, pipelines, adapters, Supabase repository, migrations, and tests.
